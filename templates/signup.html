@@ -1,0 +1,45 @@
+{% extends 'homepage.html' %}
+{% block content %}
+<body>
+    <div class="signup-container">
+        <h2>Create an Account</h2>
+        <p>Sign up to manage your stock efficiently.</p>
+        <form action="{% url 'signup_view' %}" method="POST">
+            {% csrf_token %}
+            <div class="input-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Choose a username" required>
+            </div>
+            
+            <div class="input-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            </div>
+
+            <div class="input-group">
+                <label for="role">Role</label>
+                <select id="role" name="role">
+                    <option value="Admin">Admin</option>
+                    <option value="Gestionnaire de stock">Gestionnaire de stock</option>
+                    <option value="Employe">Employe</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Create a password" required>
+            </div>
+            
+            <div class="input-group">
+                <label for="confirm-password">Confirm Password</label>
+                <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm your password" required>
+            </div>
+            
+            <button type="submit">Sign Up</button>
+            <div class="extra-links">
+                <a href="{% url 'loginpage_view' %}">Already have an account? Log in</a>
+            </div>
+        </form>
+    </div>
+</body>
+{% endblock content %}

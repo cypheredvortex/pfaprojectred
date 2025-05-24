@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+
+{% block title %}Gérer les Stocks{% endblock %}
+
+{% block content %}
+
+    <!-- Main Content -->
+    <main class="flex-1 p-8 space-y-8 overflow-auto">
+
+      <!-- Summary Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white shadow-md rounded-xl p-6 hover:shadow-lg transition">
+          <h3 class="text-lg font-semibold text-gray-700 mb-2">Articles</h3>
+          <div class="text-3xl font-bold text-blue-600">{{ total_articles }}</div>
+          <p class="text-sm text-gray-500">Total Articles</p>
+        </div>
+
+        <div class="bg-white shadow-md rounded-xl p-6 hover:shadow-lg transition">
+          <h3 class="text-lg font-semibold text-gray-700 mb-2">Stock</h3>
+          <div class="text-3xl font-bold text-blue-600">{{ total_stock }}</div>
+          <p class="text-sm text-gray-500">Total Stock Quantity</p>
+        </div>
+
+        <div class="bg-white shadow-md rounded-xl p-6 hover:shadow-lg transition">
+          <h3 class="text-lg font-semibold text-gray-700 mb-2">Stock Movements</h3>
+          <div class="text-3xl font-bold text-blue-600">{{ stock_entries.count }}</div>
+          <p class="text-sm text-gray-500">Entries (30 days)</p>
+        </div>
+
+        <div class="bg-white shadow-md rounded-xl p-6 hover:shadow-lg transition">
+          <h3 class="text-lg font-semibold text-gray-700 mb-2">Revenue</h3>
+          <div class="text-3xl font-bold text-blue-600">{{ financial_metrics.total_revenue|floatformat:2 }}€</div>
+          <p class="text-sm text-gray-500">Last 30 Days</p>
+        </div>
+
+        <div class="bg-white shadow-md rounded-xl p-6 hover:shadow-lg transition">
+          <h3 class="text-lg font-semibold text-gray-700 mb-2">Avg Order Value</h3>
+          <div class="text-3xl font-bold text-blue-600">{{ financial_metrics.avg_order_value|floatformat:2 }}€</div>
+          <p class="text-sm text-gray-500">Per Transaction</p>
+        </div>
+      </div>
+
+      <!-- Metrics Grids -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Stock Health -->
+        <div class="bg-white p-6 rounded-xl shadow-md">
+          <h3 class="text-lg font-semibold mb-4">📦 Stock Health</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <div><p class="text-sm text-gray-600">Turnover Rate</p><p class="text-xl font-semibold">{{ stock_metrics.turnover_rate|floatformat:2 }}</p></div>
+            <div><p class="text-sm text-gray-600">Out of Stock</p><p class="text-xl font-semibold">{{ stock_metrics.out_of_stock_count }}</p></div>
+            <div><p class="text-sm text-gray-600">Restock Time</p><p class="text-xl font-semibold">{{ stock_metrics.avg_restock_time }} days</p></div>
+            <div><p class="text-sm text-gray-600">Stock Value</p><p class="text-xl font-semibold">{{ stock_metrics.total_value|floatformat:2 }}€</p></div>
+          </div>
+        </div>
+
+        <!-- Performance Indicators -->
+        <div class="bg-white p-6 rounded-xl shadow-md">
+          <h3 class="text-lg font-semibold mb-4">📈 Performance</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <div><p class="text-sm text-gray-600">Fulfillment Rate</p><p class="text-xl font-semibold">{{ performance_metrics.fulfillment_rate }}%</p></div>
+            <div><p class="text-sm text-gray-600">Inventory Accuracy</p><p class="text-xl font-semibold">{{ performance_metrics.inventory_accuracy }}%</p></div>
+            <div><p class="text-sm text-gray-600">Monthly Growth</p><p class="text-xl font-semibold text-green-500">+{{ performance_metrics.monthly_growth }}%</p></div>
+            <div><p class="text-sm text-gray-600">Active SKUs</p><p class="text-xl font-semibold">{{ performance_metrics.active_skus }}</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl shadow-md p-6">
+          <h3 class="text-lg font-semibold mb-4">📊 Stock Movements</h3>
+          <canvas id="stockTrendChart"></canvas>
+        </div>
+        <div class="bg-white rounded-xl shadow-md p-6">
+          <h3 class="text-lg font-semibold mb-4">🔥 Top Articles</h3>
+          <canvas id="topArticlesChart"></canvas>
+        </div>
+        <div class="bg-white rounded-xl shadow-md p-6">
+          <h3 class="text-lg font-semibold mb-4">📦 Category Distribution</h3>
+          <canvas id="categoryChart"></canvas>
+        </div>
+        <div class="bg-white rounded-xl shadow-md p-6">
+          <h3 class="text-lg font-semibold mb-4">🏭 Supplier Performance</h3>
+          <canvas id="supplierChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Tables -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Low Stock -->
+        <div class="bg-white rounded-xl shadow-md p-6">
+          <h3 class="text-lg font-semibold mb-4">⚠️ Low Stock</h3>
+          <table class="w-full text-left">
+            <thead class="text-gray-600 border-b">
+              <tr><th class="py-2">Article</th><th class="py-2">Stock</th></tr>
+            </thead>
+            <tbody>
+              {% for article in low_stock_articles %}
+              <tr class="border-b hover:bg-gray-50">
+                <td class="py-2">{{ article.nom }}</td>
+                <td class="py-2">{{ article.quantite }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- User Activity -->
+        <div class="bg-white rounded-xl shadow-md p-6">
+          <h3 class="text-lg font-semibold mb-4">👤 Recent User Activity</h3>
+          <table class="w-full text-left">
+            <thead class="text-gray-600 border-b">
+              <tr><th class="py-2">User</th><th class="py-2">Actions</th></tr>
+            </thead>
+            <tbody>
+              {% for user in user_activity %}
+              <tr class="border-b hover:bg-gray-50">
+                <td class="py-2">{{ user.utilisateur__username }}</td>
+                <td class="py-2">{{ user.action_count }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        // Stock Trends Chart
+        const stockTrendCtx = document.getElementById('stockTrendChart').getContext('2d');
+        const stockTrendData = {{ stock_trends|safe }};
+        new Chart(stockTrendCtx, {
+            type: 'line',
+            data: {
+                labels: stockTrendData.map(item => item.date),
+                datasets: [{
+                    label: 'Entries',
+                    data: stockTrendData.map(item => item.entries || 0),
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }, {
+                    label: 'Exits',
+                    data: stockTrendData.map(item => item.exits || 0),
+                    borderColor: 'rgb(255, 99, 132)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Top Articles Chart
+        const topArticlesCtx = document.getElementById('topArticlesChart').getContext('2d');
+        const topArticlesData = {{ top_articles|safe }};
+        new Chart(topArticlesCtx, {
+            type: 'bar',
+            data: {
+                labels: topArticlesData.map(item => item.article__nom),
+                datasets: [{
+                    label: 'Quantity Sold',
+                    data: topArticlesData.map(item => item.total_quantity),
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgb(75, 192, 192)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+        const categoryData = {{ category_distribution|safe }};
+        new Chart(categoryCtx, {
+            type: 'doughnut',
+            data: {
+                labels: categoryData.map(item => item.category),
+                datasets: [{
+                    data: categoryData.map(item => item.count),
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.8)',
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 206, 86, 0.8)',
+                        'rgba(75, 192, 192, 0.8)',
+                        'rgba(153, 102, 255, 0.8)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    }
+                }
+            }
+        });
+        // Supplier Performance Chart
+    const supplierCtx = document.getElementById('supplierChart').getContext('2d');
+    const supplierData = {{ supplier_performance|safe }};
+    new Chart(supplierCtx, {
+        type: 'bar',
+        data: {
+            labels: supplierData.map(item => item.fournisseur__nom),
+            datasets: [{
+                label: 'Orders Completed',
+                data: supplierData.map(item => item.completed_orders),
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgb(75, 192, 192)',
+                borderWidth: 1
+            }, {
+                label: 'On-Time Delivery Rate (%)',
+                data: supplierData.map(item => item.on_time_rate),
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgb(54, 162, 235)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Count / Percentage'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Suppliers'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top'
+                },
+                title: {
+                    display: true,
+                    text: 'Supplier Performance Metrics'
+                }
+            }
+        }
+    });
+    </script>
+{% endblock %}
+

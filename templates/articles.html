@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+{% block title %}Gérer les Stocks{% endblock %}
+
+{% block extra_style %}
+
+        #add-stock-btn {
+            background: #1abc9c;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            border: none;
+            transition: 0.3s ease;
+        }
+
+        #add-stock-btn:hover {
+            background: #16a085;
+        }
+
+        /* Search Form */
+        .search-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: #ffffff;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        #search-bar {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1em;
+            background: #f9fafb;
+            color: #1f2937;
+        }
+
+        #search-btn {
+            background: #2563eb;
+            color: white;
+            padding: 12px 20px;
+            font-size: 1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        #search-btn:hover {
+            background: #1d4ed8;
+        }
+
+        /* Modal and Overlay */
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        #add-stock-form {
+            display: none;
+            width: 400px;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+            max-height: 90vh; /* max 90% of viewport height */
+            overflow-y: auto; /* scroll vertically if needed */
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        #add-stock-form label {
+            font-weight: 500;
+            color: #374151;
+        }
+
+        #add-stock-form input,
+        #add-stock-form select,
+        #add-stock-form textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1em;
+            background: #f9fafb;
+            color: #1f2937;
+            margin-bottom: 20px;
+        }
+
+        #add-stock-form button {
+            background: #2563eb;
+            color: white;
+            padding: 12px;
+            font-size: 1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        #add-stock-form button:hover {
+            background: #1d4ed8;
+        }
+
+        /* Articles Table */
+        .articles-list table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .articles-list th,
+        .articles-list td {
+            padding: 18px 20px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .articles-list th {
+            background: #f1f5f9;
+            color: #1e293b;
+            font-weight: 600;
+        }
+
+        .articles-list tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        .articles-list td {
+            color: #374151;
+        }
+
+        .articles-list td a,
+        .articles-list td button {
+            color: #2563eb;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .articles-list td a:hover,
+        .articles-list td button:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .dashboard {
+                flex-direction: column;
+            }
+        }
+{% endblock %}
+
+{% block content %}
+
+    <div class="dashboard">
+
+        <!-- Main Content -->
+        <main class="content">
+            <div class="header-container">
+                <h1>Gestion des Articles</h1>
+                <button id="add-stock-btn">Ajouter un Nouvel Article</button>
+            </div>
+
+            <!-- Search Form -->
+            <form method="get" action="{% url 'search_articles' %}" class="search-container">
+                <input type="text" name="query" id="search-bar" placeholder="Rechercher un article par référence ou nom" value="{{ query }}">
+                <button type="submit" id="search-btn">Rechercher</button>
+            </form>
+
+            <!-- Add Article Form (Modal) -->
+            <div id="overlay">
+                <div id="add-stock-form">
+                    <form method="post" action="{% url 'create_article' %}">
+                        {% csrf_token %}
+                        <label for="nom">Nom</label>
+                        <input type="text" id="nom" name="nom" required>
+
+                        <label for="quantite">Quantité</label>
+                        <input type="number" id="quantite" name="quantite" required>
+
+                        <label for="references">Référence</label>
+                        <input type="text" id="references" name="references">
+
+                        <label for="categorie">Catégorie</label>
+                        <input type="text" id="categorie" name="categorie">
+
+                        <label for="prix">Prix (€)</label>
+                        <input type="number" id="prix" name="prix" step="0.01">
+
+                        <label for="etat">État</label>
+                        <select name="etat" id="etat">
+                            <option value="en_stock">En stock</option>
+                            <option value="hors_stock">Hors stock</option>
+                        </select>
+
+                        <label for="description">Description</label>
+                        <textarea id="description" name="description" rows="3"></textarea>
+
+                        <label for="date_ajout">Date d'ajout</label>
+                        <input type="date" id="date_ajout" name="date_ajout">
+
+                        <button type="submit">Ajouter</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Articles List -->
+            <div class="articles-list">
+                <h3>Liste des Articles</h3>
+                <table id="articles-table">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Référence</th>
+                            <th>Catégorie</th>
+                            <th>Prix (€)</th>
+                            <th>Quantité</th>
+                            <th>État</th>
+                            <th>Date d'ajout</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for article in articles %}
+                            <tr>
+                                <td>{{ article.nom }}</td>
+                                <td>{{ article.references|default:"-" }}</td>
+                                <td>{{ article.categorie|default:"-" }}</td>
+                                <td>{{ article.prix|default:"-" }}</td>
+                                <td>{{ article.quantite }}</td>
+                                <td>{{ article.get_etat_display }}</td>
+                                <td>{{ article.date_ajout }}</td>
+                                <td>
+                                    <a href="{% url 'update_article_view' article.id %}"><i class="fas fa-edit"></i></a> |
+                                    <form action="{% url 'delete_article' article.id %}" method="POST" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" onclick="return confirm('Supprimer cet article ?');"><i class="fas fa-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr><td colspan="8">Aucun article disponible.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+{% endblock %}
+{% block extra_scripts %}
+    <script>
+        document.getElementById('add-stock-btn').addEventListener('click', function () {
+            var form = document.getElementById('add-stock-form');
+            var overlay = document.getElementById('overlay');
+            form.style.display = form.style.display === 'block' ? 'none' : 'block';
+            overlay.style.display = overlay.style.display === 'flex' ? 'none' : 'flex';
+        });
+
+        document.getElementById('overlay').addEventListener('click', function (e) {
+            if (e.target === this) {
+                document.getElementById('add-stock-form').style.display = 'none';
+                this.style.display = 'none';
+            }
+        });
+    </script>
+{% endblock %}

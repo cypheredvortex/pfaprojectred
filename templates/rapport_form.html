@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}Modifier un Rapport{% endblock %}
+
+{% block content %}
+<div class="dashboard">    
+    <div class="content">
+        <div class="stock-actions">
+            <h2>Modifier un Rapport</h2>
+            <form method="POST" action="{% url 'update_rapport' rapport.id %}">
+                {% csrf_token %}
+
+                <!-- Stock ID Dropdown -->
+                <label for="stockId">Stock</label>
+                <select id="stockId" name="stock" required>
+                    <option value="">-- Sélectionner un stock --</option>
+                    {% for s in stocks %}
+                        <option value="{{ s.id }}" {% if s.id == rapport.stock.id %}selected{% endif %}>
+                            {{ s.article.nom }} ({{ s.type|capfirst }}, {{ s.etatStock|capfirst }})
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <!-- Display Type and Etat of selected stock (not editable) -->
+                {% if rapport.stock %}
+                    <p><strong>Type de Mouvement:</strong> {{ rapport.stock.get_type_display }}</p>
+                    <p><strong>État du Stock:</strong> {{ rapport.stock.get_etatStock_display }}</p>
+                {% endif %}
+
+                <!-- Date -->
+                <label for="dateRapport">Date</label>
+                <input type="date" id="dateRapport" name="dateRapport" value="{{ rapport.dateRapport|date:'Y-m-d' }}" required>
+
+                <!-- Vente -->
+                <label for="vente">Vente</label>
+                <input type="text" id="vente" name="vente" value="{{ rapport.vente }}" required>
+
+                <!-- Approvisionnement -->
+                <label for="approvisionnement">Approvisionnement</label>
+                <input type="text" id="approvisionnement" name="approvisionnement" value="{{ rapport.approvisionnement }}" required>
+
+                <!-- Type de Rapport -->
+                <label for="type_rapport">Type de Rapport</label>
+                <select id="type_rapport" name="type_rapport" required>
+                    <option value="journalier" {% if rapport.type_rapport == 'journalier' %}selected{% endif %}>Journalier</option>
+                    <option value="hebdomadaire" {% if rapport.type_rapport == 'hebdomadaire' %}selected{% endif %}>Hebdomadaire</option>
+                    <option value="mensuel" {% if rapport.type_rapport == 'mensuel' %}selected{% endif %}>Mensuel</option>
+                </select>
+
+                <!-- Contenu du Rapport -->
+                <label for="contenu">Contenu</label>
+                <textarea id="contenu" name="contenu" rows="4" required>{{ rapport.contenu }}</textarea>
+
+                <!-- Submit Button -->
+                <button type="submit">Mettre à jour le Rapport</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

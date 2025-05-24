@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{% if article %}Modifier{% else %}Ajouter{% endif %} un Article</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"/>
+    <style>
+        body {
+            font-family: "Roboto", sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f9fafb;
+            color: #1f2937;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .dashboard {
+            display: flex;
+            width: 100%;
+        }
+
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background: #111827;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            left: 0;
+            top: 0;
+            box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar h2 {
+            color: #f9fafb;
+            text-align: center;
+            font-size: 1.8em;
+            margin-bottom: 40px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar ul li {
+            margin-bottom: 20px;
+        }
+
+        .sidebar ul li a {
+            color: #d1d5db;
+            text-decoration: none;
+            font-size: 1em;
+            padding: 12px 18px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            transition: 0.3s;
+        }
+
+        .sidebar ul li a:hover {
+            background: #2563eb;
+            color: #ffffff;
+        }
+
+        .logout {
+            color: #f87171 !important;
+        }
+
+        .content {
+            margin-left: 450px;
+            padding: 40px;
+            width: 100%;
+            background: #f3f4f6;
+        }
+
+        .content h2 {
+            font-size: 2em;
+            margin-bottom: 30px;
+            color: #111827;
+        }
+
+        .article-form form {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 800px;
+        }
+
+        .article-form h2 {
+            font-size: 1.6em;
+            margin-bottom: 20px;
+            color: #111827;
+        }
+
+        .article-form label {
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .article-form input {
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1em;
+            background: #f9fafb;
+            color: #1f2937;
+        }
+
+        .article-form button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .article-form button:hover {
+            background: #059669;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .dashboard {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <aside class="w-64 bg-gray-900 text-white flex flex-col">
+      <div class="p-6 text-2xl font-bold border-b border-gray-700">
+        <a href="{% url 'get_stocks' %}" class="hover:text-blue-400 transition">Gestion des Stocks</a>
+      </div>
+      <nav class="flex-1 p-4 space-y-2">
+        <a href="{% url 'dashboard_view' %}" class="block px-4 py-2 rounded hover:bg-gray-800"><i class="fas fa-tachometer-alt mr-2"></i> Dashboard</a>
+        <a href="{% url 'get_stocks' %}" class="block px-4 py-2 rounded hover:bg-gray-800"><i class="fas fa-box mr-2"></i> Stocks</a>
+        <a href="{% url 'get_articles' %}" class="block px-4 py-2 rounded hover:bg-gray-800"><i class="fas fa-file-alt mr-2"></i> Articles</a>
+        <a href="{% url 'get_rapports' %}" class="block px-4 py-2 rounded hover:bg-gray-800"><i class="fas fa-chart-line mr-2"></i> Rapports</a>
+        <a href="{% url 'gethistorique_view' %}" class="block px-4 py-2 rounded hover:bg-gray-800"><i class="fas fa-history mr-2"></i> Historique</a>
+        <a href="{% url 'logout_view' %}" class="block px-4 py-2 rounded hover:bg-red-700 text-red-400"><i class="fas fa-sign-out-alt mr-2"></i> Se Déconnecter</a>
+      </nav>
+    </aside>
+        </div>
+    
+        <!-- Content -->
+        <div class="content">
+            <div class="article-form">
+                <h2>{% if article %}Modifier{% else %}Ajouter{% endif %} un Article</h2>
+                <form method="POST" action="{% if article %}{% url 'update_article' article.id %}{% else %}{% url 'create_article' %}{% endif %}">
+                    {% csrf_token %}
+    
+                    <!-- Nom -->
+                    <label for="nom">Nom</label>
+                    <input type="text" id="nom" name="nom" value="{% if article %}{{ article.nom }}{% endif %}" required>
+    
+                    <!-- Quantité -->
+                    <label for="quantite">Quantité</label>
+                    <input type="number" id="quantite" name="quantite" value="{% if article %}{{ article.quantite }}{% endif %}" required>
+    
+                    <!-- Fournisseur -->
+                    <label for="fournisseur">Fournisseur (ID)</label>
+                    <input type="number" id="fournisseur" name="fournisseur" value="{% if article and article.fournisseur %}{{ article.fournisseur.id }}{% endif %}" placeholder="ID du fournisseur (facultatif)">
+    
+                    <!-- Référence -->
+                    <label for="references">Référence</label>
+                    <input type="text" id="references" name="references" value="{% if article %}{{ article.references }}{% endif %}" placeholder="Référence de l'article (facultatif)">
+    
+                    <!-- Catégorie -->
+                    <label for="categorie">Catégorie</label>
+                    <input type="text" id="categorie" name="categorie" value="{% if article %}{{ article.categorie }}{% endif %}" placeholder="Catégorie de l'article (facultatif)">
+    
+                    <!-- Prix -->
+                    <label for="prix">Prix (€)</label>
+                    <input type="number" id="prix" name="prix" step="0.01" value="{% if article %}{{ article.prix }}{% endif %}" placeholder="Prix de l'article (facultatif)">
+    
+                    <!-- Description -->
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" placeholder="Description détaillée de l'article (facultatif)">{% if article %}{{ article.description }}{% endif %}</textarea>
+    
+                    <!-- Etat -->
+                    <label for="etat">État</label>
+                    <select id="etat" name="etat">
+                        <option value="en_stock" {% if article and article.etat == 'en_stock' %}selected{% endif %}>En stock</option>
+                        <option value="hors_stock" {% if article and article.etat == 'hors_stock' %}selected{% endif %}>Hors stock</option>
+                    </select>
+    
+                    <!-- Submit -->
+                    <button type="submit">{% if article %}Modifier{% else %}Ajouter{% endif %} l'Article</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    </body>
+    
+</html>

@@ -1,0 +1,17 @@
+<h2>Confirmer la suppression du rapport</h2>
+
+<p>Êtes-vous sûr de vouloir supprimer le rapport pour le stock "{{ rapport.stockId }}" ?</p>
+
+<ul>
+    <li><strong>Date du Rapport :</strong> {{ rapport.DateRapport }}</li>
+    <li><strong>Mouvement de Stock :</strong> {{ rapport.MouvementDeStock }}</li>
+    <li><strong>État du Stock :</strong> {{ rapport.EtatStock }}</li>
+    <li><strong>Vente :</strong> {{ rapport.Vente }}</li>
+    <li><strong>Approvisionnement :</strong> {{ rapport.Approvisionnement }}</li>
+</ul>
+
+<form method="POST">
+    {% csrf_token %}
+    <button type="submit">Oui, supprimer</button>
+</form>
+<a href="{% url 'get_rapports' %}">Annuler</a>

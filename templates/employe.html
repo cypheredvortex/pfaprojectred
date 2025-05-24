@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Stock List</title>
+
+    <!-- Roboto Font & Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+
+    <style>
+        /* General Styles */
+body {
+    font-family: "Roboto", sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f3f4f6;
+    color: #333;
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    height: 100vh;
+    background: #1f2937;
+    padding: 30px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    border-right: 2px solid #3b4c61;
+}
+
+.sidebar h2 {
+    color: #f9fafb;
+    text-align: center;
+    font-size: 2.2em;
+    font-weight: 500;
+    margin-bottom: 40px;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    margin: 20px 0;
+}
+
+.sidebar ul li a {
+    color: #d1d5db;
+    text-decoration: none;
+    font-size: 1.1em;
+    display: flex;
+    align-items: center;
+    padding: 16px 18px; /* Increased padding for better spacing */
+    border-radius: 8px;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+.sidebar ul li a i {
+    margin-right: 25px;
+    font-size: 1.3em;
+}
+
+.sidebar ul li a:hover {
+    background: #4b8b8c;
+    color: #ffffff;
+}
+
+.logout {
+    color: #f87171;
+}
+
+/* Main Content */
+.content {
+    margin-left: 600px; /* Increased margin-left for more space */
+    padding: 50px 40px; /* Increased padding inside the main content */
+    background: #ffffff;
+    flex-grow: 1;
+}
+
+/* Header (if needed for your main content) */
+.content h2 {
+    font-size: 2em;
+    font-weight: 500;
+    margin-bottom: 20px;
+}
+
+/* Stock Table */
+.stock-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.stock-table th,
+.stock-table td {
+    padding: 16px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.stock-table th {
+    background-color: #f9fafb;
+    font-weight: 600;
+    color: #374151;
+}
+
+.stock-table tbody tr:hover {
+    background-color: #f1f5f9;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 220px;
+        padding: 20px;
+    }
+
+    .content {
+        margin-left: 240px;
+    }
+
+    .stock-table {
+        margin-top: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .sidebar {
+        width: 100%;
+        position: relative;
+        height: auto;
+        padding: 20px;
+    }
+
+    .content {
+        margin-left: 0;
+    }
+
+    .stock-table {
+        margin-top: 20px;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <h2>Gestion de Stock</h2>
+            <ul>
+                <li><a href="{% url 'liststocks_view' %}"><i class="fas fa-box"></i> Stocks</a></li>
+                <li><a href="{% url 'listarticles_view' %}"><i class="fas fa-file-alt"></i> Articles</a></li>
+                <li><a href="{% url 'listcommands_view' %}"><i class="fas fa-shopping-cart"></i> Commandes</a></li>
+                <li><a href="#" class="logout"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <!-- Simplified Stats Section -->
+            <section class="stats">
+                
+            </section>
+        </main>
+    </div>    
+</body>
+</html>

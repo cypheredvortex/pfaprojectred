@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+
+{% block title %}Gérer les Stocks{% endblock %}
+
+{% block extra_style %}
+    /* Search Form Styling */
+    .search-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 30px;
+        background: #ffffff;
+        padding: 15px 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    #search-bar {
+        flex: 1;
+        padding: 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 1em;
+        background: #f9fafb;
+        color: #1f2937;
+    }
+
+    /* Add Stock Button */
+    #add-stock-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: #1abc9c;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.3s ease;
+        font-size: 1.1em;
+    }
+
+    #add-stock-btn:hover {
+        background: #16a085;
+    }
+
+    /* Modal and Overlay */
+    #overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+    }
+
+    #add-stock-form {
+        display: none;
+        width: 400px;
+        background: #ffffff;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    /* Fade-in Animation */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+{% endblock %}
+
+{% block content %}
+    <div class="header-container">
+        <h1>Gérer les Stocks</h1>
+        <button id="add-stock-btn">Ajouter un Nouveau Stock</button>
+    </div>
+
+    <!-- Stock Search Form -->
+    <form method="get" action="{% url 'search_stocks' %}" class="search-container">
+        <input type="text" name="query" id="search-bar" placeholder="Rechercher un article par référence ou nom" value="{{ query }}">
+        <button type="submit" id="search-btn">Rechercher</button>
+    </form>
+
+    <!-- Article Details (Optional if used in search) -->
+    {% if article %}
+        <div class="card">
+            <h2>{{ article.nom }}</h2>
+            <p>Référence : {{ article.references }}</p>
+            <p>Catégorie : {{ article.categorie }}</p>
+            <p>Prix : {{ article.prix }} €</p>
+            <p>Quantité disponible : {{ article.quantite }}</p>
+        </div>
+    {% elif query %}
+        <p>Aucun article trouvé pour "{{ query }}"</p>
+    {% endif %}
+
+    <!-- Modal and Add Stock Form -->
+    <div id="overlay">
+        <div id="add-stock-form">
+            <form method="post" action="{% url 'create_stock' %}">
+                {% csrf_token %}
+                
+                <label for="article">Sélectionner un Article</label>
+                <select id="article" name="article" required>
+                    <option value="">Choisir un article</option>
+                    {% for article in articles %}
+                        <option value="{{ article.id }}">{{ article.nom }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="quantite">Quantité</label>
+                <input type="number" id="quantite" name="quantiteDisponible" placeholder="Quantité" required>
+
+                <label for="seuilAlerte">Seuil d'Alerte</label>
+                <input type="number" id="seuilAlerte" name="seuilAlerte" placeholder="Seuil d'Alerte" required>
+
+                <label for="type">Type de Stock</label>
+                <select id="type" name="type" required>
+                    <option value="entree">Entrée</option>
+                    <option value="sortie">Sortie</option>
+                </select>
+
+                <label for="etatStock">État du Stock</label>
+                <select id="etatStock" name="etatStock" required>
+                    <option value="hors_alerte">Hors alerte</option>
+                    <option value="en_alerte">En alerte</option>
+                </select>
+
+                <label for="date">Date du Mouvement</label>
+                <input type="date" id="date" name="date" required>
+
+                <button type="submit">Ajouter</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Stocks List -->
+    <div class="stocks-list">
+        <h3>Liste des Stocks</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nom de l'Article</th>
+                    <th>ID Article</th>
+                    <th>Quantité Disponible</th>
+                    <th>Seuil d'Alerte</th>
+                    <th>Type</th>
+                    <th>État</th>
+                    <th>Date</th>
+                    <th>Utilisateur</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stock in stocks %}
+                    <tr>
+                        <td>{{ stock.article.nom }}</td>
+                        <td>{{ stock.article.id }}</td>
+                        <td>{{ stock.quantiteDisponible }}</td>
+                        <td>{{ stock.seuilAlerte }}</td>
+                        <td>{{ stock.get_type_display }}</td>
+                        <td>{{ stock.get_etatStock_display }}</td>
+                        <td>{{ stock.date|date:"d/m/Y" }}</td>
+                        <td>{{ stock.utilisateur.username }}</td>
+                        <td>
+                            <a href="{% url 'get_stock_form' %}"><i class="fas fa-edit"></i></a> |
+                            <form action="{% url 'delete_stock' stock.id %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce stock ?');"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="9">Aucun stock disponible.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        document.getElementById('add-stock-btn').addEventListener('click', function () {
+            var form = document.getElementById('add-stock-form');
+            var overlay = document.getElementById('overlay');
+            form.style.display = 'block';
+            overlay.style.display = 'flex';
+        });
+
+        document.getElementById('overlay').addEventListener('click', function (e) {
+            if (e.target === this) {
+                document.getElementById('add-stock-form').style.display = 'none';
+                this.style.display = 'none';
+            }
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{% if stock %}Modifier{% else %}Ajouter{% endif %} un Stock</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"/>
+    <style>
+        body {
+            font-family: "Roboto", sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f9fafb;
+            color: #1f2937;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .dashboard {
+            display: flex;
+            width: 100%;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background: #111827;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            left: 0;
+            top: 0;
+            box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar h2 {
+            color: #f9fafb;
+            text-align: center;
+            font-size: 1.8em;
+            margin-bottom: 40px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar ul li {
+            margin-bottom: 20px;
+        }
+
+        .sidebar ul li a {
+            color: #d1d5db;
+            text-decoration: none;
+            font-size: 1em;
+            padding: 12px 18px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            transition: 0.3s;
+        }
+
+        .sidebar ul li a:hover {
+            background: #2563eb;
+            color: #ffffff;
+        }
+
+        .logout {
+            color: #f87171 !important;
+        }
+
+        /* Content */
+        .content {
+            margin-left: 450px;
+            padding: 40px;
+            width: 100%;
+            background: #f3f4f6;
+        }
+
+        .content h2 {
+            font-size: 2em;
+            margin-bottom: 30px;
+            color: #111827;
+        }
+
+        /* Stock Form */
+        .stock-actions form {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 40px;
+            max-width: 800px;
+        }
+
+        .stock-actions h2 {
+            font-size: 1.6em;
+            margin-bottom: 20px;
+            color: #111827;
+        }
+
+        .stock-actions label {
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .stock-actions input,
+        .stock-actions select {
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1em;
+            background: #f9fafb;
+            color: #1f2937;
+        }
+
+        .stock-actions button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .stock-actions button:hover {
+            background: #059669;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .dashboard {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <aside class="w-64 bg-gray-900 text-white flex flex-col">
+      <div class="p-6 text-2xl font-bold border-b border-gray-700">
+        <a href="{% url 'get_stocks' %}" class="hover:text-blue-400 transition">Gestion des Stocks</a>
+      </div>
+      <nav class="flex-1 p-4 space-y-2">
+        <a href="{% url 'dashboard_view' %}" class="block px-4 py-2 rounded hover:bg-gray-800"><i class="fas fa-tachometer-alt mr-2"></i> Dashboard</a>
+        <a href="{% url 'get_stocks' %}" class="block px-4 py-2 rounded hover:bg-gray-800"><i class="fas fa-box mr-2"></i> Stocks</a>
+        <a href="{% url 'get_articles' %}" class="block px-4 py-2 rounded hover:bg-gray-800"><i class="fas fa-file-alt mr-2"></i> Articles</a>
+        <a href="{% url 'get_rapports' %}" class="block px-4 py-2 rounded hover:bg-gray-800"><i class="fas fa-chart-line mr-2"></i> Rapports</a>
+        <a href="{% url 'gethistorique_view' %}" class="block px-4 py-2 rounded hover:bg-gray-800"><i class="fas fa-history mr-2"></i> Historique</a>
+        <a href="{% url 'logout_view' %}" class="block px-4 py-2 rounded hover:bg-red-700 text-red-400"><i class="fas fa-sign-out-alt mr-2"></i> Se Déconnecter</a>
+      </nav>
+    </aside>
+        </div>
+
+        <!-- Content -->
+        <main class="content">
+            <h2>{% if stock %}Modifier un Stock{% else %}Ajouter un Stock{% endif %}</h2>
+        
+            <div class="stock-actions">
+                <h3>{% if stock %}Modifier un Stock{% else %}Ajouter un Stock{% endif %}</h3>
+        
+                <form method="post" action="{% if stock %}{% url 'update_stock' stock.id %}{% else %}{% url 'create_stock' %}{% endif %}">
+                    {% csrf_token %}
+        
+                    <!-- Select Article -->
+                    <label for="article">Sélectionner un Article</label>
+                    <select id="article" name="article" required>
+                        <option value="">Choisir un article</option>
+                        {% for article in articles %}
+                            <option value="{{ article.id }}" {% if stock and article.id == stock.article.id %}selected{% endif %}>
+                                {{ article.nom }}
+                            </option>
+                        {% endfor %}
+                    </select>
+        
+                    <!-- Quantity -->
+                    <label for="quantiteDisponible">Quantité Disponible</label>
+                    <input type="number" id="quantiteDisponible" name="quantiteDisponible"
+                           placeholder="Quantité"
+                           value="{% if stock %}{{ stock.quantiteDisponible }}{% endif %}"
+                           required>
+        
+                    <!-- Alert Threshold -->
+                    <label for="seuilAlerte">Seuil d'Alerte</label>
+                    <input type="number" id="seuilAlerte" name="seuilAlerte"
+                           placeholder="Seuil d'alerte"
+                           value="{% if stock %}{{ stock.seuilAlerte }}{% endif %}"
+                           required>
+        
+                    <!-- Type of Stock (Entrée/Sortie) -->
+                    <label for="type">Type de Stock</label>
+                    <select id="type" name="type" required>
+                        <option value="entree" {% if stock and stock.type == 'entree' %}selected{% endif %}>Entrée</option>
+                        <option value="sortie" {% if stock and stock.type == 'sortie' %}selected{% endif %}>Sortie</option>
+                    </select>
+        
+                    <!-- Stock Status (En Alerte / Hors Alerte) -->
+                    <label for="etatStock">État du Stock</label>
+                    <select id="etatStock" name="etatStock" required>
+                        <option value="en_alerte" {% if stock and stock.etatStock == 'en_alerte' %}selected{% endif %}>En alerte</option>
+                        <option value="hors_alerte" {% if stock and stock.etatStock == 'hors_alerte' %}selected{% endif %}>Hors alerte</option>
+                    </select>
+        
+                    <!-- Date of Movement -->
+                    <label for="date">Date du Mouvement</label>
+                    <input type="date" id="date" name="date"
+                           value="{% if stock %}{{ stock.date|date:'Y-m-d' }}{% endif %}"
+                           required>
+        
+                    <!-- Hidden field for user (this is auto-filled from the logged-in user) -->
+                    <input type="hidden" name="utilisateur" value="{{ request.user.id }}">
+        
+                    <button type="submit">{% if stock %}Mettre à jour{% else %}Ajouter{% endif %}</button>
+                </form>
+        
+                {% if error %}
+                    <p style="color: red;">{{ error }}</p>
+                {% endif %}
+            </div>
+        </main>
+        
+    </div>
+</body>
+
+</html>

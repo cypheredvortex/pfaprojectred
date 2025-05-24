@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestion de Stock</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Roboto", sans-serif;
+      background-color: #f9fafb;
+      color: #1f2937;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .dashboard {
+      display: flex;
+      width: 100%;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 250px;
+      height: 100vh;
+      background: #111827;
+      padding: 30px 20px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      box-shadow: 4px 0 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .sidebar h2 {
+      color: #f9fafb;
+      text-align: center;
+      font-size: 1.6rem;
+      margin-bottom: 40px;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .sidebar ul li {
+      margin-bottom: 16px;
+    }
+
+    .sidebar ul li a {
+      display: flex;
+      align-items: center;
+      color: #d1d5db;
+      text-decoration: none;
+      padding: 12px 16px;
+      border-radius: 8px;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .sidebar ul li a i {
+      margin-right: 12px;
+    }
+
+    .sidebar ul li a:hover {
+      background-color: #2563eb;
+      color: #fff;
+    }
+
+    .sidebar ul li a.logout {
+      color: #f87171;
+    }
+
+    /* Content */
+    .content {
+      margin-left: 270px;
+      padding: 40px;
+      flex-grow: 1;
+      background: #f3f4f6;
+    }
+
+    .content h3 {
+      font-size: 1.8rem;
+      margin-bottom: 30px;
+      color: #111827;
+    }
+
+    /* Table */
+    .stock-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+    }
+
+    .stock-table th, .stock-table td {
+      padding: 16px 20px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .stock-table th {
+      background-color: #f1f5f9;
+      color: #1f2937;
+      font-weight: 600;
+    }
+
+    .stock-table tbody tr:hover {
+      background-color: #f9fafb;
+    }
+
+    .stock-table td {
+      color: #374151;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+      }
+
+      .content {
+        margin-left: 0;
+        padding: 20px;
+      }
+
+      .dashboard {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h2><a href="{% url 'liststocks_view' %}" style="color: inherit; text-decoration: none;">Gestion de Stock</a></h2>
+      <ul>
+        <li><a href="{% url 'list_stocks' %}"><i class="fas fa-box"></i> Stocks</a></li>
+        <li><a href="{% url 'list_articles' %}"><i class="fas fa-file-alt"></i> Articles</a></li>
+        <li><a href="{% url 'get_commands' %}"><i class="fas fa-shopping-cart"></i> Commandes</a></li>
+        <li><a href="{% url 'logout_view' %}" class="logout"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main content -->
+    <main class="content">
+      <h3>Liste des Stocks</h3>
+      <table class="stock-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Article</th>
+            <th>Quantité Disponible</th>
+            <th>Seuil d'Alerte</th>
+            <th>Type</th>
+            <th>État du Stock</th>
+            <th>Utilisateur</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for stock in stocks %}
+            <tr>
+              <td>{{ stock.id }}</td>
+              <td>{{ stock.article.nom }}</td>
+              <td>{{ stock.quantiteDisponible }}</td>
+              <td>{{ stock.seuilAlerte }}</td>
+              <td>{{ stock.type }}</td>
+              <td>{{ stock.etatStock }}</td>
+              <td>{{ stock.utilisateur.username }}</td>
+              <td>{{ stock.date }}</td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="8">Aucun stock trouvé.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </main>
+  </div>
+</body>
+</html>

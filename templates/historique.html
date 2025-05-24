@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+  <div class="dashboard">
+    <!-- Content -->
+    <main class="content">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="card">
+          <h4 class="text-sm text-gray-500">Total Revenue</h4>
+          <p class="text-2xl font-semibold text-green-600">${{ total_revenue }}</p>
+        </div>
+        <div class="card">
+          <h4 class="text-sm text-gray-500">Total Orders</h4>
+          <p class="text-2xl font-semibold">{{ total_orders }}</p>
+        </div>
+        <div class="card">
+          <h4 class="text-sm text-gray-500">Avg Order Value</h4>
+          <p class="text-2xl font-semibold">${{ average_order_value }}</p>
+        </div>
+        <div class="card">
+          <h4 class="text-sm text-gray-500">Total Stock Qty</h4>
+          <p class="text-2xl font-semibold">{{ total_stock_qty }}</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div class="card">
+          <h3 class="text-lg font-semibold mb-4">Monthly Revenue</h3>
+          <canvas id="revenueChart"></canvas>
+        </div>
+        <div class="card">
+          <h3 class="text-lg font-semibold mb-4">Stock Movement</h3>
+          <canvas id="stockMovementChart"></canvas>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="card">
+          <h3 class="text-lg font-semibold mb-4">Top Selling Articles</h3>
+          <ul class="space-y-2">
+            {% for article in articles_data %}
+              <li class="flex justify-between">
+                <span>{{ article.nom }}</span>
+                <span class="font-semibold">{{ article.demand }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="card">
+          <h3 class="text-lg font-semibold mb-4">Growth Potential</h3>
+          <ul class="space-y-2">
+            {% for g in growth_potential_data %}
+              <li class="flex justify-between">
+                <span>{{ g.article }}</span>
+                <span class="text-green-600 font-semibold">+{{ g.growth|floatformat:2 }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="card">
+          <h4 class="text-sm text-gray-500">Total Purchase Cost</h4>
+          <p class="text-xl font-semibold text-red-500">${{ total_purchase_cost }}</p>
+        </div>
+        <div class="card">
+          <h4 class="text-sm text-gray-500">Profit</h4>
+          <p class="text-xl font-semibold text-green-600">${{ profit }}</p>
+        </div>
+        <div class="card">
+          <h4 class="text-sm text-gray-500">Low Stock Value</h4>
+          <p class="text-xl font-semibold text-yellow-600">${{ low_stock_value }}</p>
+        </div>
+      </div>
+
+      <div class="mb-10">
+        <h3 class="text-lg font-semibold mb-4">Supplier Spend</h3>
+        <div class="card overflow-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Supplier</th>
+                <th>Total Spend</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for s in supplier_spend %}
+              <tr>
+                <td>{{ s.fournisseur__nom }}</td>
+                <td>${{ s.total_spend }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="text-lg font-semibold mb-4">Cost per Article</h3>
+        <div class="card overflow-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Article</th>
+                <th>Min</th>
+                <th>Max</th>
+                <th>Avg</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in cost_per_article %}
+              <tr>
+                <td>{{ c.article__nom }}</td>
+                <td>${{ c.min_cost }}</td>
+                <td>${{ c.max_cost }}</td>
+                <td>${{ c.avg_cost|floatformat:2 }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+  {% endblock %}
+
+  {% block extra_scripts %}
+  <!-- Chart.js Scripts -->
+  <script>
+    // Revenue Chart
+    const revenueChart = document.getElementById('revenueChart').getContext('2d');
+    new Chart(revenueChart, {
+      type: 'line',
+      data: {
+        labels: {{ revenue_labels|safe }},
+        datasets: [{
+          label: 'Current Month Revenue',
+          data: {{ revenue_values|safe }},
+          backgroundColor: 'rgba(34,197,94,0.2)',
+          borderColor: 'rgba(34,197,94,1)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.3, 
+          pointRadius: 4,
+          pointBackgroundColor: 'rgba(34,197,94,1)',
+        }]
+      },
+      options: {
+        responsive: true,
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+          tooltip: {
+            callbacks: {
+              label: function(tooltipItem) {
+                return '$' + tooltipItem.raw.toFixed(2);
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Month'
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Revenue'
+            },
+            ticks: {
+              beginAtZero: true
+            }
+          }
+        }
+      }
+    });
+
+    // Stock Movement Chart
+    const stockChart = document.getElementById('stockMovementChart').getContext('2d');
+    new Chart(stockChart, {
+      type: 'line',
+      data: {
+        labels: {{ stock_labels|safe }},
+        datasets: [
+          {
+            label: 'Stock Entries (ENTREE)',
+            data: {{ stock_entries_values|safe }},
+            backgroundColor: 'rgba(34,197,94,0.2)',
+            borderColor: 'rgba(34,197,94,1)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4, 
+            pointRadius: 4,
+            pointBackgroundColor: 'rgba(34,197,94,1)',
+          },
+          {
+            label: 'Stock Exits (SORTIE)',
+            data: {{ stock_exits_values|safe }},
+            backgroundColor: 'rgba(239,68,68,0.2)',
+            borderColor: 'rgba(239,68,68,1)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4, 
+            pointRadius: 4,
+            pointBackgroundColor: 'rgba(239,68,68,1)',
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: function(tooltipItem) {
+                return tooltipItem.dataset.label + ': ' + tooltipItem.raw;
+              }
+            }
+          },
+          legend: {
+            position: 'top',
+          }
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Month'
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Movement'
+            },
+            ticks: {
+              beginAtZero: true
+            }
+          }
+        }
+      }
+    });
+    
+  </script>
+{% endblock %}
+    

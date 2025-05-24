@@ -1,0 +1,14 @@
+<h2>Confirmer la suppression du stock</h2>
+
+<p>Êtes-vous sûr de vouloir supprimer le stock de l'article "{{ stock.article.nom }}" ?</p>
+
+<ul>
+    <li><strong>Quantité Disponible :</strong> {{ stock.quantiteDisponible }}</li>
+    <li><strong>Seuil d'Alerte :</strong> {{ stock.seuilAlerte }}</li>
+</ul>
+
+<form method="POST">
+    {% csrf_token %}
+    <button type="submit">Oui, supprimer</button>
+</form>
+<a href="{% url 'get_stocks' %}">Annuler</a>

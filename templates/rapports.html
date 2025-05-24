@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+
+{% block title %}Gérer les Rapports{% endblock %}
+
+{% block extra_style %}
+    .search-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 30px;
+        background: #ffffff;
+        padding: 15px 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    #search-bar {
+        flex: 1;
+        padding: 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 1em;
+        background: #f9fafb;
+        color: #1f2937;
+    }
+
+    #add-rapport-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: #1abc9c;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.3s ease;
+        font-size: 1.1em;
+        border: none;
+    }
+
+    #add-rapport-btn:hover {
+        background: #16a085;
+    }
+
+    #overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+    }
+
+    #rapportModal {
+        display: none;
+        background: #fff;
+        padding: 30px;
+        border-radius: 12px;
+        width: 600px;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .rapport-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .rapport-table th, .rapport-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #f1f1f1;
+    }
+
+    .rapport-table th {
+        background-color: #f9fafb;
+        color: #374151;
+        font-weight: 600;
+    }
+
+    .rapport-table td i {
+        margin-right: 5px;
+        cursor: pointer;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .form-grid input, .form-grid select, .form-grid textarea {
+        width: 100%;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        font-size: 1em;
+    }
+
+    .btn-submit {
+        margin-top: 20px;
+        background: #1abc9c;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        border: none;
+        font-size: 1em;
+    }
+
+    .btn-submit:hover {
+        background: #16a085;
+    }
+{% endblock %}
+
+{% block content %}
+    <div class="header-container">
+        <h1>Gérer les Rapports</h1>
+        <button id="add-rapport-btn" onclick="toggleModal()">Ajouter un Rapport</button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+        <input type="text" id="search-bar" placeholder="Rechercher dans les rapports..." onkeyup="filterTable()">
+    </div>
+
+    <!-- Table -->
+    <table class="rapport-table" id="rapportTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Article</th>
+                <th>Réf</th>
+                <th>Catégorie</th>
+                <th>Stock</th>
+                <th>Date</th>
+                <th>Mouv.</th>
+                <th>État</th>
+                <th>Vente</th>
+                <th>Appro.</th>
+                <th>Type</th>
+                <th>Contenu</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rapport in rapports %}
+            <tr>
+                <td>{{ rapport.id }}</td>
+                <td>{{ rapport.stock.article.nom }}</td>
+                <td>{{ rapport.stock.article.references }}</td>
+                <td>{{ rapport.stock.article.categorie }}</td>
+                <td>{{ rapport.stock.quantiteDisponible }}</td>
+                <td>{{ rapport.dateRapport }}</td>
+                <td>{{ rapport.stock.type }}</td>
+                <td>{{ rapport.stock.etatStock }}</td>
+                <td>{{ rapport.vente }}</td>
+                <td>{{ rapport.approvisionnement }}</td>
+                <td>{{ rapport.type_rapport }}</td>
+                <td>{{ rapport.contenu }}</td>
+                <td>
+                    <a href="{% url 'update_rapport_view' rapport.id %}"><i class="fas fa-edit text-blue-500"></i></a>
+                    <form method="POST" action="{% url 'delete_rapport' rapport.id %}" class="inline delete-form" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" onclick="return confirm('Supprimer ce rapport ?');" style="background:none;border:none;">
+                            <i class="fas fa-trash text-red-500"></i>
+                        </button>
+                    </form>
+                    <a href="{% url 'rapport_pdf' %}"><i class="fas fa-download text-green-500"></i></a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="13">Aucun rapport disponible.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Modal Overlay -->
+    <div id="overlay">
+        <div id="rapportModal">
+            <h3>Ajouter un Rapport</h3>
+            <form method="POST" action="{% url 'create_rapport' %}">
+                {% csrf_token %}
+                <div class="form-grid">
+                    <input type="number" name="stockId" placeholder="Stock ID" required>
+                    <input type="date" name="dateRapport" required>
+                    <input type="text" name="mouvementDeStock" placeholder="Mouvement" required>
+                    <input type="text" name="etatStock" placeholder="État Stock" required>
+                    <input type="text" name="vente" placeholder="Vente" required>
+                    <input type="text" name="approvisionnement" placeholder="Approvisionnement" required>
+                    <select name="type_rapport" required>
+                        <option value="">Type de Rapport</option>
+                        <option value="journalier">Journalier</option>
+                        <option value="hebdomadaire">Hebdomadaire</option>
+                        <option value="mensuel">Mensuel</option>
+                    </select>
+                    <textarea name="contenu" rows="4" placeholder="Contenu du Rapport" required></textarea>
+                </div>
+                <button type="submit" class="btn-submit">Ajouter</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function toggleModal() {
+        const overlay = document.getElementById("overlay");
+        const modal = document.getElementById("rapportModal");
+        const isOpen = overlay.style.display === "flex";
+        overlay.style.display = isOpen ? "none" : "flex";
+        modal.style.display = isOpen ? "none" : "block";
+    }
+
+    document.getElementById("overlay").addEventListener("click", function (e) {
+        if (e.target === this) {
+            toggleModal();
+        }
+    });
+
+    function filterTable() {
+        const input = document.getElementById("search-bar").value.toLowerCase();
+        const rows = document.querySelectorAll("#rapportTable tbody tr");
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(input) ? "" : "none";
+        });
+    }
+</script>
+{% endblock %}

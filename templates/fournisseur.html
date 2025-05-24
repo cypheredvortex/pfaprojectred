@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suppliers - Stock Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #121212;
+            color: #fff;
+        }
+        
+        .suppliers-container {
+            width: 80%;
+            margin: 50px auto;
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+        
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .supplier-actions {
+            margin-bottom: 30px;
+        }
+        
+        .supplier-actions h3 {
+            text-align: center;
+        }
+        
+        .supplier-actions form {
+            display: grid;
+            grid-gap: 10px;
+        }
+        
+        .supplier-actions input {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #333;
+            background: #222;
+            color: #fff;
+        }
+        
+        .supplier-actions button {
+            background: #bb86fc;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .supplier-actions button:hover {
+            background: #9b59ff;
+        }
+        
+        .suppliers-list table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        
+        .suppliers-list th, .suppliers-list td {
+            padding: 12px;
+            border: 1px solid #333;
+        }
+        
+        .suppliers-list th {
+            background: #222;
+        }
+        
+        .suppliers-list td {
+            background: #1e1e1e;
+        }
+        
+        .suppliers-list button {
+            background: #e74c3c;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .suppliers-list button:hover {
+            background: #c0392b;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="suppliers-container">
+        <h2>Gestion des Fournisseurs</h2>
+
+        <!-- Add/Edit Supplier Section -->
+        <div class="supplier-actions">
+            <h3>Ajouter/Modifier un Fournisseur</h3>
+            <form id="supplier-form">
+                <label for="supplier-name">Nom du Fournisseur</label>
+                <input type="text" id="supplier-name" name="name" placeholder="Nom du fournisseur" required>
+
+                <label for="supplier-contact">Contact</label>
+                <input type="text" id="supplier-contact" name="contact" placeholder="Numéro de téléphone ou email" required>
+
+                <label for="supplier-address">Adresse</label>
+                <input type="text" id="supplier-address" name="address" placeholder="Adresse du fournisseur" required>
+
+                <button type="submit">Ajouter Fournisseur</button>
+            </form>
+        </div>
+
+        <!-- Supplier List -->
+        <div class="suppliers-list">
+            <h3>Liste des Fournisseurs</h3>
+            <table id="suppliers-table">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Contact</th>
+                        <th>Adresse</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dynamic supplier list will go here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    
+</body>
+</html>
