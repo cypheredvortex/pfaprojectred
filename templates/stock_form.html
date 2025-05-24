@@ -184,14 +184,10 @@
         
                     <!-- Select Article -->
                     <label for="article">Sélectionner un Article</label>
-                    <select id="article" name="article" required>
-                        <option value="">Choisir un article</option>
-                        {% for article in articles %}
-                            <option value="{{ article.id }}" {% if stock and article.id == stock.article.id %}selected{% endif %}>
-                                {{ article.nom }}
-                            </option>
-                        {% endfor %}
-                    </select>
+                    <input type="text" id="article" name="article"
+                           placeholder="article"
+                           value="{% if stock %}{{ stock.article.nom }}{% endif %}"
+                           required>
         
                     <!-- Quantity -->
                     <label for="quantiteDisponible">Quantité Disponible</label>
