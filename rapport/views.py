@@ -60,7 +60,8 @@ def create_rapport(request):
 @login_required(login_url='/loginpage/')
 def get_rapports(request):
     rapports = Rapport.objects.all()
-    response = render(request, 'rapports.html', {'rapports': rapports})
+    stocks=Stock.objects.all()
+    response = render(request, 'rapports.html', {'rapports': rapports,'stocks':stocks})
     return disable_cache(response)
 
 @never_cache
