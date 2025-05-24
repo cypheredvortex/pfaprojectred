@@ -64,6 +64,15 @@ def get_stock_form(request):
 
 @never_cache
 @login_required(login_url='/loginpage/')
+def update_stock_view(request, stock_id):
+    if not request.user.is_authenticated:
+        return redirect('/loginpage/')
+    stock = get_object_or_404(Stock, pk=stock_id)
+    response = render(request, 'stock_form.html', {'stock': stock})
+    return disable_cache(response)
+
+@never_cache
+@login_required(login_url='/loginpage/')
 def list_stocks(request):
     if not request.user.is_authenticated:
         return redirect('/loginpage/')
@@ -129,26 +138,27 @@ def update_stock(request, stock_id):
     stock = get_object_or_404(Stock, id=stock_id)
 
     if request.method == 'POST':
-        article_id = request.POST.get('article')
-        quantite = request.POST.get('quantite')
+        article_nom = request.POST.get('article')  # Nom au lieu d'ID
+        quantiteDisponible = request.POST.get('quantiteDisponible')
         seuilAlerte = request.POST.get('seuilAlerte')
         type = request.POST.get('type')
         etatStock = request.POST.get('etatStock')
+        date_mouvement = request.POST.get('date')
 
         try:
-            article = Article.objects.get(id=article_id)
-            quantite = int(quantite)
+            article = Article.objects.get(nom=article_nom)
+            quantiteDisponible = int(quantiteDisponible)
             seuilAlerte = int(seuilAlerte)
 
             stock.article = article
-            stock.quantiteDisponible = quantite
+            stock.quantiteDisponible = quantiteDisponible
             stock.seuilAlerte = seuilAlerte
             stock.type = type
             stock.etatStock = etatStock
+            stock.date = date_mouvement
             stock.utilisateur = request.user
-            stock.date=timezone.now().date()
-            stock.save()
 
+            stock.save()
             return redirect('get_stocks')
 
         except (ValueError, TypeError, Article.DoesNotExist):
