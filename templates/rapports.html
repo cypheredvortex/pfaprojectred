@@ -199,29 +199,39 @@
 
     <!-- Modal Overlay -->
     <div id="overlay">
-        <div id="rapportModal">
-            <h3>Ajouter un Rapport</h3>
-            <form method="POST" action="{% url 'create_rapport' %}">
-                {% csrf_token %}
-                <div class="form-grid">
-                    <input type="number" name="stockId" placeholder="Stock ID" required>
-                    <input type="date" name="dateRapport" required>
-                    <input type="text" name="mouvementDeStock" placeholder="Mouvement" required>
-                    <input type="text" name="etatStock" placeholder="État Stock" required>
-                    <input type="text" name="vente" placeholder="Vente" required>
-                    <input type="text" name="approvisionnement" placeholder="Approvisionnement" required>
-                    <select name="type_rapport" required>
-                        <option value="">Type de Rapport</option>
-                        <option value="journalier">Journalier</option>
-                        <option value="hebdomadaire">Hebdomadaire</option>
-                        <option value="mensuel">Mensuel</option>
-                    </select>
-                    <textarea name="contenu" rows="4" placeholder="Contenu du Rapport" required></textarea>
-                </div>
-                <button type="submit" class="btn-submit">Ajouter</button>
-            </form>
-        </div>
+    <div id="rapportModal">
+        <h3>Ajouter un Rapport</h3>
+        <form method="POST" action="{% url 'create_rapport' %}">
+            {% csrf_token %}
+            <div class="form-grid">
+                <!-- Stock selection dropdown -->
+                <select name="stock" required>
+                    <option value="">Sélectionner un stock</option>
+                    {% for stock in stocks %}
+                        <option value="{{ stock.id }}">Stock {{ stock.id }} - {{ stock.article.nom }}</option>
+                    {% endfor %}
+                </select>
+
+                <input type="date" name="dateRapport" required>
+
+                <input type="text" name="vente" placeholder="Vente" required>
+
+                <input type="text" name="approvisionnement" placeholder="Approvisionnement" required>
+
+                <select name="type_rapport" required>
+                    <option value="">Type de Rapport</option>
+                    <option value="journalier">Journalier</option>
+                    <option value="hebdomadaire">Hebdomadaire</option>
+                    <option value="mensuel">Mensuel</option>
+                </select>
+
+                <textarea name="contenu" rows="4" placeholder="Contenu du Rapport" required></textarea>
+            </div>
+            <button type="submit" class="btn-submit">Ajouter</button>
+        </form>
     </div>
+</div>
+
 {% endblock %}
 
 {% block extra_scripts %}
