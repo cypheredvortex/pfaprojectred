@@ -198,11 +198,10 @@
                 <button id="add-stock-btn">Ajouter un Nouvel Article</button>
             </div>
 
-            <!-- Search Form -->
-            <form method="get" action="{% url 'search_articles' %}" class="search-container">
-                <input type="text" name="query" id="search-bar" placeholder="Rechercher un article par référence ou nom" value="{{ query }}">
-                <button type="submit" id="search-btn">Rechercher</button>
-            </form>
+            <!-- Search Bar -->
+    <div class="search-container">
+        <input type="text" id="search-bar" placeholder="Rechercher dans les articles..." onkeyup="filterTable()">
+    </div>
 
             <!-- Add Article Form (Modal) -->
             <div id="overlay">
@@ -299,5 +298,13 @@
                 this.style.display = 'none';
             }
         });
+        function filterTable() {
+        const input = document.getElementById("search-bar").value.toLowerCase();
+        const rows = document.querySelectorAll("#articles-table tbody tr");
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(input) ? "" : "none";
+        });
+    }
     </script>
 {% endblock %}
