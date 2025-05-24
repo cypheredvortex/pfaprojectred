@@ -8,36 +8,45 @@
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid #333; padding: 8px; text-align: left; }
         th { background-color: #f0f0f0; }
-        h1 { text-align: center; }
+        h1, h2 { text-align: center; }
     </style>
 </head>
 <body>
     <h1>Rapport de Stock</h1>
+    <h2>{{ date_rapport|default:"" }}</h2>
+
     <table>
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Stock ID</th>
+                <th>ID Stock</th>
                 <th>Date</th>
-                <th>Mouvement</th>
-                <th>État Stock</th>
+                <th>Type</th>
                 <th>Vente</th>
                 <th>Approvisionnement</th>
+                <th>Généré par</th>
             </tr>
         </thead>
         <tbody>
             {% for rapport in rapports %}
             <tr>
                 <td>{{ rapport.id }}</td>
-                <td>{{ rapport.stockId }}</td>
-                <td>{{ rapport.DateRapport }}</td>
-                <td>{{ rapport.MouvementDeStock }}</td>
-                <td>{{ rapport.EtatStock }}</td>
-                <td>{{ rapport.Vente }}</td>
-                <td>{{ rapport.Approvisionnement }}</td>
+                <td>{{ rapport.stock.id }}</td>
+                <td>{{ rapport.dateRapport }}</td>
+                <td>{{ rapport.type_rapport }}</td>
+                <td>{{ rapport.vente }}</td>
+                <td>{{ rapport.approvisionnement }}</td>
+                <td>{{ rapport.généré_par.username }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+
+    <h2>Contenu détaillé</h2>
+    {% for rapport in rapports %}
+        <h3>Rapport ID {{ rapport.id }} - {{ rapport.dateRapport }}</h3>
+        <p>{{ rapport.contenu }}</p>
+        <hr>
+    {% endfor %}
 </body>
 </html>
